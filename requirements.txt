@@ -1,0 +1,5 @@
+# Core deps to run the env, trainer, and sweep.
+# The environment (nashville_sim/env.py) and dashboard generator use only the
+# Python standard library; training needs torch + numpy.
+torch>=2.1
+numpy>=1.26

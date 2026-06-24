@@ -1,0 +1,22 @@
+{
+  "seed": 5094,
+  "years": 10,
+  "annual_budget": 1.0,
+  "annual_refill": true,
+  "total_steps": 800000,
+  "num_envs": 256,
+  "lr": 0.0005,
+  "gamma": 0.99,
+  "gae_lambda": 0.9,
+  "clip_coef": 0.2,
+  "ent_coef": 0.003,
+  "vf_coef": 0.5,
+  "max_grad_norm": 0.5,
+  "update_epochs": 8,
+  "num_minibatches": 2,
+  "hidden_size": 256,
+  "anneal_lr": true,
+  "eval_episodes": 64,
+  "log_every_updates": 8,
+  "device": "cuda"
+}

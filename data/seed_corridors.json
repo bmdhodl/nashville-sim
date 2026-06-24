@@ -1,0 +1,85 @@
+{
+  "description": "Seed corridor set for NashvilleGrowthEnv. Real Nashville growth corridors with normalized [0,1] pressure values. Reconstructed seed data; tune values to taste. geometry_points are rough [lon,lat] anchors and are not used by the env dynamics.",
+  "corridors": [
+    {
+      "name": "Nolensville Pike",
+      "housing_pressure": 0.78,
+      "jobs_pressure": 0.52,
+      "transit_access": 0.34,
+      "crash_risk": 0.62,
+      "density": 0.41,
+      "political_friction": 0.38,
+      "geometry_points": [[-86.74, 36.13], [-86.71, 36.07]]
+    },
+    {
+      "name": "Charlotte Pike",
+      "housing_pressure": 0.61,
+      "jobs_pressure": 0.66,
+      "transit_access": 0.29,
+      "crash_risk": 0.55,
+      "density": 0.37,
+      "political_friction": 0.44,
+      "geometry_points": [[-86.84, 36.15], [-86.90, 36.13]]
+    },
+    {
+      "name": "Gallatin Pike",
+      "housing_pressure": 0.69,
+      "jobs_pressure": 0.48,
+      "transit_access": 0.46,
+      "crash_risk": 0.71,
+      "density": 0.52,
+      "political_friction": 0.33,
+      "geometry_points": [[-86.74, 36.19], [-86.70, 36.25]]
+    },
+    {
+      "name": "Murfreesboro Pike",
+      "housing_pressure": 0.74,
+      "jobs_pressure": 0.71,
+      "transit_access": 0.31,
+      "crash_risk": 0.68,
+      "density": 0.39,
+      "political_friction": 0.41,
+      "geometry_points": [[-86.73, 36.12], [-86.65, 36.03]]
+    },
+    {
+      "name": "Dickerson Pike",
+      "housing_pressure": 0.83,
+      "jobs_pressure": 0.39,
+      "transit_access": 0.22,
+      "crash_risk": 0.59,
+      "density": 0.28,
+      "political_friction": 0.29,
+      "geometry_points": [[-86.76, 36.20], [-86.73, 36.27]]
+    },
+    {
+      "name": "West End Avenue",
+      "housing_pressure": 0.47,
+      "jobs_pressure": 0.79,
+      "transit_access": 0.58,
+      "crash_risk": 0.44,
+      "density": 0.63,
+      "political_friction": 0.57,
+      "geometry_points": [[-86.80, 36.15], [-86.86, 36.13]]
+    },
+    {
+      "name": "Lebanon Pike",
+      "housing_pressure": 0.56,
+      "jobs_pressure": 0.51,
+      "transit_access": 0.27,
+      "crash_risk": 0.64,
+      "density": 0.33,
+      "political_friction": 0.36,
+      "geometry_points": [[-86.71, 36.17], [-86.62, 36.13]]
+    },
+    {
+      "name": "Clarksville Pike",
+      "housing_pressure": 0.64,
+      "jobs_pressure": 0.43,
+      "transit_access": 0.24,
+      "crash_risk": 0.57,
+      "density": 0.26,
+      "political_friction": 0.31,
+      "geometry_points": [[-86.83, 36.20], [-86.88, 36.25]]
+    }
+  ]
+}
