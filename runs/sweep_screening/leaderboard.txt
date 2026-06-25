@@ -1,0 +1,14 @@
+rank  best_eval  uplift_vs_greedy  argmax   sample   lr       gamma  ent     epochs  mb   hidden  envs  anneal  trial
+   1     0.1530            0.2520    0.153    0.151  0.0008   0.97   0.03    8       8    128     128   True    sweep_screening/trials/trial_0010
+   2     0.0980            0.1970    0.098    0.059  0.0008   0.99   0.03    8       8    128     128   False   sweep_screening/trials/trial_0012
+   3    -0.0200            0.0790   -0.020   -0.027  0.001    0.95   0.0     8       2    64      128   True    sweep_screening/trials/trial_0005
+   4    -0.0450            0.0540   -0.045   -0.045  0.0005   0.99   0.003   8       2    256     256   True    sweep_screening/trials/trial_0004
+   5    -0.0640            0.0350   -0.071   -0.064  0.0001   0.95   0.03    8       2    128     128   False   sweep_screening/trials/trial_0009
+   6    -0.0689            0.0301   -0.070   -0.069  0.0002   0.93   0.03    4       8    128     128   True    sweep_screening/trials/trial_0006
+   7    -0.0770            0.0220   -0.077   -0.078  0.0005   0.93   0.0     2       8    256     512   False   sweep_screening/trials/trial_0011
+   8    -0.0781            0.0209   -0.081   -0.078  0.0008   0.95   0.0     2       4    256     512   False   sweep_screening/trials/trial_0000
+   9    -0.0918            0.0072   -0.205   -0.092  0.0008   0.95   0.03    2       8    256     128   False   sweep_screening/trials/trial_0008
+  10    -0.0950            0.0040   -0.095   -0.101  0.001    0.97   0.01    2       4    128     128   False   sweep_screening/trials/trial_0002
+  11    -0.1201           -0.0211   -0.246   -0.120  0.0002   0.9    0.001   2       4    256     256   True    sweep_screening/trials/trial_0007
+  12    -0.1418           -0.0428   -0.246   -0.142  0.0002   0.97   0.0     4       2    64      256   True    sweep_screening/trials/trial_0001
+  13    -0.1440           -0.0450   -0.144   -0.144  0.001    0.93   0.003   8       4    256     512   False   sweep_screening/trials/trial_0003

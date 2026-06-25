@@ -1,19 +1,22 @@
-"""Overnight PPO hyperparameter sweep for NashvilleGrowthEnv.
+"""Overnight PPO hyperparameter sweep. Works on any registered env (--env).
 
 Time-budgeted random search. Runs all trials in one process so the CUDA context
 initializes once. Each trial trains a PPO agent with sampled hyperparameters and
 records its best deployable return (max of argmax / sampled eval). Results stream
 to disk after every trial, a leaderboard is kept sorted, and the best agent's
-checkpoint is copied to runs/sweep/champion.pt.
+checkpoint is copied to champion.pt.
+
+Output dir is runs/sweep for the city env and runs/sweep_<env> otherwise, so a
+screening sweep never clobbers the nashville results.
 
 Safe to run unattended:
   * hard wall-clock budget (default 8h); stops launching trials near the limit
-  * every trial wrapped in try/except — one bad config never kills the night
+  * every trial wrapped in try/except — one bad config never kills the run
   * incremental writes, so a crash/kill still leaves a usable leaderboard
   * Ctrl-C exits cleanly with a summary
 
 Usage:
-  python sweep.py --budget-hours 8
+  python sweep.py --env screening --budget-hours 0.3
   python sweep.py --budget-hours 0.1 --steps-per-trial 100000   # quick test
 """
 
@@ -32,8 +35,7 @@ import torch
 
 from train import Config, train
 
-SWEEP_DIR = Path(__file__).resolve().parent / "runs" / "sweep"
-
+RUNS_DIR = Path(__file__).resolve().parent / "runs"
 
 # Hyperparameter search space. Each entry is a list of choices; the sampler
 # picks uniformly. Kept to PPO ranges that are sane for a small discrete env.
@@ -52,10 +54,12 @@ SEARCH_SPACE = {
 }
 
 
-def sample_config(rng: random.Random, trial_idx: int, steps_per_trial: int) -> Config:
+def sample_config(rng: random.Random, trial_idx: int, steps_per_trial: int,
+                  env: str, sweep_name: str) -> Config:
     chosen = {k: rng.choice(v) for k, v in SEARCH_SPACE.items()}
     return Config(
-        run_name=f"sweep/trials/trial_{trial_idx:04d}",
+        run_name=f"{sweep_name}/trials/trial_{trial_idx:04d}",
+        env=env,
         seed=5090 + trial_idx,
         total_steps=steps_per_trial,
         eval_episodes=96,
@@ -84,22 +88,25 @@ def write_leaderboard(results: list[dict], path: Path, top: int = 25) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--env", default="nashville")
     ap.add_argument("--budget-hours", type=float, default=8.0)
     ap.add_argument("--steps-per-trial", type=int, default=800_000)
     ap.add_argument("--seed", type=int, default=5090)
     args = ap.parse_args()
 
-    SWEEP_DIR.mkdir(parents=True, exist_ok=True)
-    results_path = SWEEP_DIR / "sweep_results.jsonl"
-    leaderboard_path = SWEEP_DIR / "leaderboard.txt"
-    champion_path = SWEEP_DIR / "champion.pt"
-    champion_meta_path = SWEEP_DIR / "champion.json"
+    sweep_name = "sweep" if args.env == "nashville" else f"sweep_{args.env}"
+    sweep_dir = RUNS_DIR / sweep_name
+    sweep_dir.mkdir(parents=True, exist_ok=True)
+    results_path = sweep_dir / "sweep_results.jsonl"
+    leaderboard_path = sweep_dir / "leaderboard.txt"
+    champion_path = sweep_dir / "champion.pt"
+    champion_meta_path = sweep_dir / "champion.json"
 
     budget_s = args.budget_hours * 3600.0
     rng = random.Random(args.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    print(f"[sweep] device={device} budget={args.budget_hours}h "
+    print(f"[sweep] env={args.env} device={device} budget={args.budget_hours}h "
           f"steps/trial={args.steps_per_trial:,}")
     print(f"[sweep] results -> {results_path}")
 
@@ -119,13 +126,13 @@ def main() -> None:
                       f"next trial (~{est_trial:.0f}s) would exceed budget.")
                 break
 
-            cfg = sample_config(rng, trial_idx, args.steps_per_trial)
+            cfg = sample_config(rng, trial_idx, args.steps_per_trial, args.env, sweep_name)
             t0 = time.time()
             try:
                 result = train(cfg)
-            except Exception as exc:  # noqa: BLE001 — one trial must not kill the sweep
+            except Exception as exc:  # noqa: BLE001 — one trial must not kill the run
                 print(f"[sweep] trial {trial_idx:04d} FAILED: {exc}")
-                (SWEEP_DIR / f"trial_{trial_idx:04d}_error.txt").write_text(
+                (sweep_dir / f"trial_{trial_idx:04d}_error.txt").write_text(
                     traceback.format_exc()
                 )
                 trial_idx += 1
@@ -146,7 +153,7 @@ def main() -> None:
             tag = ""
             if result["best_eval_return"] > best_overall:
                 best_overall = result["best_eval_return"]
-                src = Path(__file__).resolve().parent / "runs" / cfg.run_name / "best.pt"
+                src = RUNS_DIR / cfg.run_name / "best.pt"
                 if src.exists():
                     shutil.copy(src, champion_path)
                 champion_meta_path.write_text(json.dumps(result, indent=2))

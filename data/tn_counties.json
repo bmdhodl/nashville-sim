@@ -1,0 +1,17 @@
+{
+  "description": "Illustrative Tennessee county dataset for EarlyDetectionEnv. Values are normalized [0,1] and calibrated to the well-documented urban/rural and Social-Vulnerability disparity in TN cancer outcomes (affluent suburbs screen well and catch early; rural Appalachian/Delta counties screen poorly, catch late, high SVI). NOT pulled from a source. Replace per the schema with: screening_rate <- CDC PLACES; late_stage_share/incidence <- SEER / NCI State Cancer Profiles; svi <- CDC/ATSDR SVI; population <- Census.",
+  "counties": [
+    {"name": "Shelby (Memphis)",       "population": 929000, "screening_rate": 0.55, "late_stage_share": 0.48, "incidence": 0.62, "svi": 0.66, "awareness": 0.50, "capacity": 0.60},
+    {"name": "Davidson (Nashville)",    "population": 715000, "screening_rate": 0.66, "late_stage_share": 0.38, "incidence": 0.52, "svi": 0.42, "awareness": 0.62, "capacity": 0.78},
+    {"name": "Knox (Knoxville)",        "population": 478000, "screening_rate": 0.64, "late_stage_share": 0.39, "incidence": 0.55, "svi": 0.34, "awareness": 0.60, "capacity": 0.70},
+    {"name": "Hamilton (Chattanooga)",  "population": 366000, "screening_rate": 0.62, "late_stage_share": 0.40, "incidence": 0.56, "svi": 0.38, "awareness": 0.58, "capacity": 0.66},
+    {"name": "Rutherford",              "population": 341000, "screening_rate": 0.70, "late_stage_share": 0.34, "incidence": 0.47, "svi": 0.28, "awareness": 0.65, "capacity": 0.66},
+    {"name": "Williamson",              "population": 247000, "screening_rate": 0.78, "late_stage_share": 0.30, "incidence": 0.45, "svi": 0.12, "awareness": 0.72, "capacity": 0.80},
+    {"name": "Montgomery (Clarksville)","population": 221000, "screening_rate": 0.58, "late_stage_share": 0.42, "incidence": 0.50, "svi": 0.40, "awareness": 0.55, "capacity": 0.55},
+    {"name": "Madison (Jackson)",       "population": 98000,  "screening_rate": 0.52, "late_stage_share": 0.46, "incidence": 0.58, "svi": 0.50, "awareness": 0.48, "capacity": 0.45},
+    {"name": "Lauderdale",              "population": 26000,  "screening_rate": 0.43, "late_stage_share": 0.55, "incidence": 0.60, "svi": 0.78, "awareness": 0.38, "capacity": 0.30},
+    {"name": "Grundy",                  "population": 13000,  "screening_rate": 0.40, "late_stage_share": 0.58, "incidence": 0.64, "svi": 0.80, "awareness": 0.34, "capacity": 0.24},
+    {"name": "Lake",                    "population": 7000,   "screening_rate": 0.38, "late_stage_share": 0.59, "incidence": 0.61, "svi": 0.82, "awareness": 0.32, "capacity": 0.20},
+    {"name": "Hancock",                 "population": 6600,   "screening_rate": 0.35, "late_stage_share": 0.62, "incidence": 0.66, "svi": 0.88, "awareness": 0.28, "capacity": 0.18}
+  ]
+}

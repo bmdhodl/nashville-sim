@@ -29,8 +29,16 @@ import torch.nn as nn
 
 from nashville_sim import NashvilleGrowthEnv
 from nashville_sim.env import load_corridors
+from screening_sim import EarlyDetectionEnv
+from screening_sim.env import load_counties
 
 RUNS_DIR = Path(__file__).resolve().parent / "runs"
+
+# Selectable environments — same interface, different skin. Pick via Config.env.
+ENV_REGISTRY = {
+    "nashville": (NashvilleGrowthEnv, load_corridors),
+    "screening": (EarlyDetectionEnv, load_counties),
+}
 
 
 @dataclass
@@ -38,6 +46,7 @@ class Config:
     run_name: str = "ppo"
     seed: int = 5090
     # env
+    env: str = "nashville"
     years: int = 10
     annual_budget: float = 1.0
     annual_refill: bool = True
@@ -96,11 +105,11 @@ class VecEnv:
     """Synchronous vectorized env. Full-episode rollouts: reset all, step
     `years` times, every env terminates together on the last step."""
 
-    def __init__(self, num_envs: int, corridors, cfg: Config, base_seed: int):
+    def __init__(self, num_envs: int, env_cls, units, cfg: Config, base_seed: int):
         self.cfg = cfg
         self.envs = [
-            NashvilleGrowthEnv(
-                corridors=corridors,
+            env_cls(
+                units,
                 years=cfg.years,
                 annual_budget=cfg.annual_budget,
                 annual_refill=cfg.annual_refill,
@@ -133,14 +142,14 @@ class VecEnv:
         return obs, rewards, dones
 
 
-def evaluate_baselines(corridors, cfg: Config, episodes: int) -> dict[str, float]:
+def evaluate_baselines(env_cls, units, cfg: Config, episodes: int) -> dict[str, float]:
     """Mean episode return for the scripted baselines, fixed eval seeds."""
     results: dict[str, float] = {}
     for policy in ("no_op", "random", "greedy"):
         total = 0.0
         for ep in range(episodes):
-            env = NashvilleGrowthEnv(
-                corridors=corridors,
+            env = env_cls(
+                units,
                 years=cfg.years,
                 annual_budget=cfg.annual_budget,
                 annual_refill=cfg.annual_refill,
@@ -165,7 +174,7 @@ def evaluate_baselines(corridors, cfg: Config, episodes: int) -> dict[str, float
 
 @torch.no_grad()
 def evaluate_policy(
-    model: ActorCritic, corridors, cfg: Config, episodes: int, device, mode: str = "argmax"
+    model: ActorCritic, env_cls, units, cfg: Config, episodes: int, device, mode: str = "argmax"
 ) -> float:
     """Eval the learned policy on fixed eval seeds.
 
@@ -180,8 +189,8 @@ def evaluate_policy(
     gen.manual_seed(cfg.seed + 777)
     total = 0.0
     for ep in range(episodes):
-        env = NashvilleGrowthEnv(
-            corridors=corridors,
+        env = env_cls(
+            units,
             years=cfg.years,
             annual_budget=cfg.annual_budget,
             annual_refill=cfg.annual_refill,
@@ -211,8 +220,9 @@ def train(config: Config | dict[str, Any]) -> dict[str, Any]:
     np.random.seed(cfg.seed)
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
 
-    corridors = load_corridors()
-    vec = VecEnv(cfg.num_envs, corridors, cfg, base_seed=cfg.seed)
+    env_cls, loader = ENV_REGISTRY[cfg.env]
+    units = loader()
+    vec = VecEnv(cfg.num_envs, env_cls, units, cfg, base_seed=cfg.seed)
     obs_dim, act_dim = vec.obs_dim, vec.act_dim
 
     model = ActorCritic(obs_dim, act_dim, cfg.hidden_size).to(device)
@@ -320,8 +330,8 @@ def train(config: Config | dict[str, Any]) -> dict[str, Any]:
         do_eval = (update % cfg.log_every_updates == 0) or (update == num_updates)
         eval_argmax = eval_sample = float("nan")
         if do_eval:
-            eval_argmax = evaluate_policy(model, corridors, cfg, cfg.eval_episodes, device, "argmax")
-            eval_sample = evaluate_policy(model, corridors, cfg, cfg.eval_episodes, device, "sample")
+            eval_argmax = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "argmax")
+            eval_sample = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "sample")
             best_now = max(eval_argmax, eval_sample)
             if best_now > best_eval:
                 best_eval = best_now
@@ -348,12 +358,13 @@ def train(config: Config | dict[str, Any]) -> dict[str, Any]:
         log_file.flush()
 
     log_file.close()
-    baselines = evaluate_baselines(corridors, cfg, cfg.eval_episodes)
-    final_argmax = evaluate_policy(model, corridors, cfg, cfg.eval_episodes, device, "argmax")
-    final_sample = evaluate_policy(model, corridors, cfg, cfg.eval_episodes, device, "sample")
+    baselines = evaluate_baselines(env_cls, units, cfg, cfg.eval_episodes)
+    final_argmax = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "argmax")
+    final_sample = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "sample")
     best_eval = max(best_eval, final_argmax, final_sample)
     result = {
         "run_name": cfg.run_name,
+        "env": cfg.env,
         "best_eval_return": round(best_eval, 4),
         "final_eval_argmax": round(final_argmax, 4),
         "final_eval_sample": round(final_sample, 4),

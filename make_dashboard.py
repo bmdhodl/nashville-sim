@@ -9,6 +9,7 @@ dashboard.html with inline SVG charts — no JS, no CDN, opens anywhere.
 
 from __future__ import annotations
 
+import argparse
 import csv
 import html
 import json
@@ -16,9 +17,29 @@ from pathlib import Path
 from statistics import mean
 
 BASE = Path(__file__).resolve().parent
-SWEEP = BASE / "runs" / "sweep"
-OUT = SWEEP / "dashboard.html"
 REPO_URL = "https://github.com/bmdhodl/nashville-sim"
+
+# Per-environment labels so one generator renders either sweep.
+ENV_META = {
+    "nashville": {
+        "sweep": "sweep", "curve": "champion_curve", "episode": "Episode 1",
+        "title": "Nashville-sim — PPO tuning sweep",
+        "subtitle": "City-growth RL environment, reconstructed from bytecode",
+        "blurb": "An RL agent learns to spend a city's limited budget across growth corridors.",
+    },
+    "screening": {
+        "sweep": "sweep_screening", "curve": "champion_curve_screening", "episode": "Episode 2",
+        "title": "Screening allocator — PPO tuning sweep",
+        "subtitle": "Cancer-screening budget allocation across Tennessee counties, same engine new skin",
+        "blurb": "The same allocation engine, now spending a limited cancer-screening budget across "
+                 "Tennessee counties to maximize population-weighted early-stage detection.",
+    },
+}
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--env", default="nashville", choices=list(ENV_META))
+META = ENV_META[_ap.parse_args().env]
+SWEEP = BASE / "runs" / META["sweep"]
+OUT = SWEEP / "dashboard.html"
 
 # ---- palette --------------------------------------------------------------
 BG = "#0b0e14"
@@ -45,7 +66,7 @@ results = [
 champ = json.loads((SWEEP / "champion.json").read_text())
 
 curve_rows: list[dict] = []
-mp = BASE / "runs" / "champion_curve" / "metrics.csv"
+mp = BASE / "runs" / META["curve"] / "metrics.csv"
 if mp.exists():
     curve_rows = list(csv.DictReader(mp.read_text().splitlines()))
 
@@ -252,11 +273,11 @@ HTML = f"""<!doctype html>
 </style></head>
 <body><div class="wrap">
 
-  <div class="banner"><b>Building an allocation engine in public · Episode 1.</b> An RL agent
-  learns to spend a city's limited budget across growth corridors. Code &amp; data: <a href="{REPO_URL}">{REPO_URL}</a></div>
+  <div class="banner"><b>Building an allocation engine in public · {META['episode']}.</b> {esc(META['blurb'])}
+  Code &amp; data: <a href="{REPO_URL}">{REPO_URL}</a></div>
 
-  <h1>Nashville-sim — PPO tuning sweep</h1>
-  <p class="sub">City-growth RL environment · reconstructed from bytecode · {n_trials} sweep trials · champion vs scripted baselines</p>
+  <h1>{esc(META['title'])}</h1>
+  <p class="sub">{esc(META['subtitle'])} · {n_trials} sweep trials · champion vs scripted baselines</p>
 
   <div class="note">
     <b>Run note:</b> a time-boxed hyperparameter sweep of <b>{n_trials} trials</b>.
