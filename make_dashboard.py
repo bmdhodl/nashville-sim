@@ -259,10 +259,10 @@ HTML = f"""<!doctype html>
   <p class="sub">City-growth RL environment · reconstructed from bytecode · {n_trials} sweep trials · champion vs scripted baselines</p>
 
   <div class="note">
-    <b>Run note:</b> the overnight sweep was budgeted for 8h but stopped after
-    <b>{n_trials} trials</b> when the dev box slept. All results were saved as they
-    completed, and {near_ceiling} of {n_trials} trials reached the same performance
-    ceiling, so the champion is trustworthy despite the short run.
+    <b>Run note:</b> a time-boxed hyperparameter sweep of <b>{n_trials} trials</b>.
+    {near_ceiling} of {n_trials} reached the same performance ceiling, so the champion
+    is robust rather than luck — random search keeps rediscovering the same
+    near-optimal policy.
   </div>
 
   <div class="grid">

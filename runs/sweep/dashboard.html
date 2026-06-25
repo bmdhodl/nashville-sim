@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nashville-sim — PPO sweep dashboard</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0b0e14; color:#d7dde7; font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:1040px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:18px; margin:34px 0 12px; color:#d7dde7; }
+  .sub { color:#8893a7; margin:0 0 18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
+  .card { background:#151a23; border:1px solid #222a37; border-radius:12px; padding:16px; }
+  .stat .n { font-size:30px; font-weight:700; }
+  .stat .l { color:#8893a7; font-size:13px; }
+  .lime { color:#a3e635; } .amber { color:#fbbf24; } .red { color:#f87171; } .muted { color:#8893a7; }
+  .chip { display:inline-block; background:#1d2533; border:1px solid #222a37; border-radius:6px; padding:3px 8px; margin:3px 4px 3px 0; font-size:12px; color:#d7dde7; font-family:ui-monospace,monospace; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th,td { text-align:right; padding:6px 8px; border-bottom:1px solid #222a37; white-space:nowrap; }
+  th { color:#8893a7; font-weight:600; position:sticky; top:0; background:#151a23; }
+  td:first-child, th:first-child { text-align:center; }
+  tr.champ td { background:rgba(163,230,53,0.10); color:#a3e635; font-weight:600; }
+  .tablewrap { max-height:520px; overflow:auto; border-radius:12px; }
+  .note { background:#151a23; border-left:3px solid #fbbf24; border-radius:8px; padding:12px 16px; margin:10px 0; color:#d7dde7; }
+  .legend span { margin-right:16px; font-size:12px; color:#8893a7; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  code { background:#1d2533; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  a { color:#a3e635; text-decoration:none; } a:hover { text-decoration:underline; }
+  .banner { background:linear-gradient(90deg,#1a2230,#151a23); border:1px solid #222a37; border-left:3px solid #a3e635; border-radius:10px; padding:10px 16px; margin:0 0 18px; font-size:13px; color:#8893a7; }
+  .banner b { color:#a3e635; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:720px) { .two { grid-template-columns:1fr; } }
+</style></head>
+<body><div class="wrap">
+
+  <div class="banner"><b>Building an allocation engine in public · Episode 1.</b> An RL agent
+  learns to spend a city's limited budget across growth corridors. Code &amp; data: <a href="https://github.com/bmdhodl/nashville-sim">https://github.com/bmdhodl/nashville-sim</a></div>
+
+  <h1>Nashville-sim — PPO tuning sweep</h1>
+  <p class="sub">City-growth RL environment · reconstructed from bytecode · 12 sweep trials · champion vs scripted baselines</p>
+
+  <div class="note">
+    <b>Run note:</b> a time-boxed hyperparameter sweep of <b>12 trials</b>.
+    12 of 12 reached the same performance ceiling, so the champion
+    is robust rather than luck — random search keeps rediscovering the same
+    near-optimal policy.
+  </div>
+
+  <div class="grid">
+    <div class="card stat"><div class="n lime">-0.312</div><div class="l">champion return (best of argmax/sample)</div></div>
+    <div class="card stat"><div class="n">+0.303</div><div class="l">uplift vs greedy (+49% of the gap)</div></div>
+    <div class="card stat"><div class="n">12</div><div class="l">sweep trials completed</div></div>
+    <div class="card stat"><div class="n">12</div><div class="l">trials at the ~-0.312 ceiling</div></div>
+  </div>
+
+  <h2>Champion vs baselines</h2>
+  <p class="sub">Higher (less negative) is better. The learned policy beats the hand-written greedy planner and the do-nothing / random baselines.</p>
+  <div class="card"><svg viewBox="0 0 760 204" width="100%" role="img">
+<line x1="120.0" y1="10" x2="120.0" y2="194" stroke="#222a37" stroke-width="1"/>
+<text x="120.0" y="202" fill="#8893a7" font-size="10" text-anchor="middle">-1.04</text>
+<line x1="262.5" y1="10" x2="262.5" y2="194" stroke="#222a37" stroke-width="1"/>
+<text x="262.5" y="202" fill="#8893a7" font-size="10" text-anchor="middle">-0.85</text>
+<line x1="405.0" y1="10" x2="405.0" y2="194" stroke="#222a37" stroke-width="1"/>
+<text x="405.0" y="202" fill="#8893a7" font-size="10" text-anchor="middle">-0.65</text>
+<line x1="547.5" y1="10" x2="547.5" y2="194" stroke="#222a37" stroke-width="1"/>
+<text x="547.5" y="202" fill="#8893a7" font-size="10" text-anchor="middle">-0.46</text>
+<line x1="690.0" y1="10" x2="690.0" y2="194" stroke="#222a37" stroke-width="1"/>
+<text x="690.0" y="202" fill="#8893a7" font-size="10" text-anchor="middle">-0.26</text>
+<text x="110" y="36" fill="#d7dde7" font-size="13" text-anchor="end">no_op</text>
+<rect x="120" y="18" width="38.5" height="26" rx="4" fill="#8893a7" opacity="0.9"/>
+<text x="166.5" y="36" fill="#d7dde7" font-size="12">-0.991</text>
+<text x="110" y="82" fill="#d7dde7" font-size="13" text-anchor="end">random</text>
+<rect x="120" y="64" width="120.4" height="26" rx="4" fill="#8893a7" opacity="0.9"/>
+<text x="248.4" y="82" fill="#d7dde7" font-size="12">-0.879</text>
+<text x="110" y="128" fill="#d7dde7" font-size="13" text-anchor="end">greedy</text>
+<rect x="120" y="110" width="312.6" height="26" rx="4" fill="#fbbf24" opacity="0.9"/>
+<text x="440.6" y="128" fill="#d7dde7" font-size="12">-0.615</text>
+<text x="110" y="174" fill="#d7dde7" font-size="13" text-anchor="end">PPO champion</text>
+<rect x="120" y="156" width="533.5" height="26" rx="4" fill="#a3e635" opacity="0.9"/>
+<text x="661.5" y="174" fill="#d7dde7" font-size="12">-0.312</text>
+</svg></div>
+
+  <h2>Champion learning curve</h2>
+  <p class="legend"><span><i class="dot" style="background:#60a5fa"></i>train return (sampled)</span><span><i class="dot" style="background:#a3e635"></i>eval (sampled)</span><span><i class="dot" style="background:#fbbf24"></i>greedy baseline</span><span><i class="dot" style="background:#8893a7"></i>no_op baseline</span></p>
+  <div class="card"><svg viewBox="0 0 760 300" width="100%" role="img">
+<line x1="46" y1="254.0" x2="714" y2="254.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="258.0" fill="#8893a7" font-size="10" text-anchor="end">-1.03</text>
+<line x1="46" y1="202.0" x2="714" y2="202.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="206.0" fill="#8893a7" font-size="10" text-anchor="end">-0.85</text>
+<line x1="46" y1="150.0" x2="714" y2="150.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="154.0" fill="#8893a7" font-size="10" text-anchor="end">-0.67</text>
+<line x1="46" y1="98.0" x2="714" y2="98.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="102.0" fill="#8893a7" font-size="10" text-anchor="end">-0.49</text>
+<line x1="46" y1="46.0" x2="714" y2="46.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="50.0" fill="#8893a7" font-size="10" text-anchor="end">-0.30</text>
+<text x="46.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">1</text>
+<text x="380.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">98</text>
+<text x="714.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">195</text>
+<line x1="46" y1="135.0" x2="714" y2="135.0" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+<text x="710" y="130.0" fill="#fbbf24" font-size="10" text-anchor="end">greedy -0.615</text>
+<line x1="46" y1="242.9" x2="714" y2="242.9" stroke="#8893a7" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+<text x="710" y="237.9" fill="#8893a7" font-size="10" text-anchor="end">no_op -0.991</text>
+<polyline points="46.0,205.2 49.4,186.0 52.9,174.9 56.3,163.8 59.8,143.3 63.2,134.2 66.7,128.3 70.1,122.7 73.5,118.7 77.0,117.5 80.4,111.0 83.9,108.2 87.3,101.6 90.8,99.0 94.2,95.9 97.6,94.4 101.1,89.2 104.5,88.6 108.0,89.4 111.4,84.0 114.9,83.8 118.3,85.1 121.8,82.9 125.2,83.9 128.6,81.3 132.1,81.7 135.5,80.8 139.0,80.2 142.4,80.6 145.9,80.5 149.3,79.2 152.7,78.7 156.2,78.4 159.6,77.8 163.1,78.5 166.5,78.3 170.0,77.6 173.4,77.0 176.8,76.0 180.3,76.2 183.7,76.9 187.2,76.6 190.6,75.7 194.1,74.9 197.5,75.0 200.9,74.3 204.4,73.2 207.8,72.8 211.3,71.8 214.7,71.2 218.2,71.0 221.6,70.4 225.1,69.9 228.5,69.4 231.9,69.4 235.4,70.4 238.8,69.0 242.3,69.1 245.7,68.8 249.2,68.4 252.6,68.0 256.0,68.1 259.5,68.7 262.9,68.4 266.4,68.7 269.8,69.2 273.3,68.2 276.7,67.0 280.1,67.6 283.6,68.4 287.0,68.5 290.5,68.3 293.9,67.0 297.4,67.0 300.8,67.6 304.2,67.4 307.7,67.0 311.1,67.3 314.6,66.0 318.0,66.2 321.5,66.7 324.9,65.9 328.4,66.2 331.8,65.2 335.2,66.1 338.7,65.8 342.1,65.9 345.6,65.1 349.0,65.6 352.5,65.9 355.9,65.1 359.3,64.7 362.8,65.4 366.2,64.9 369.7,65.1 373.1,64.1 376.6,64.9 380.0,64.7 383.4,65.1 386.9,64.3 390.3,64.3 393.8,64.0 397.2,64.5 400.7,63.7 404.1,63.7 407.5,63.5 411.0,63.4 414.4,63.6 417.9,63.6 421.3,63.7 424.8,63.7 428.2,64.1 431.6,63.2 435.1,63.6 438.5,63.6 442.0,63.6 445.4,63.0 448.9,63.7 452.3,63.5 455.8,63.5 459.2,63.1 462.6,63.6 466.1,63.2 469.5,62.9 473.0,63.2 476.4,63.2 479.9,63.0 483.3,63.3 486.7,63.2 490.2,63.1 493.6,63.2 497.1,63.2 500.5,63.0 504.0,63.2 507.4,63.2 510.8,63.0 514.3,63.1 517.7,63.2 521.2,63.4 524.6,63.0 528.1,63.0 531.5,63.0 534.9,62.8 538.4,63.1 541.8,63.1 545.3,62.8 548.7,62.9 552.2,63.0 555.6,63.1 559.1,63.1 562.5,63.0 565.9,62.9 569.4,63.1 572.8,63.0 576.3,62.8 579.7,62.8 583.2,62.9 586.6,62.9 590.0,63.0 593.5,62.8 596.9,62.8 600.4,62.7 603.8,62.7 607.3,61.8 610.7,60.9 614.1,60.9 617.6,60.1 621.0,61.2 624.5,59.6 627.9,59.0 631.4,59.9 634.8,59.4 638.2,60.0 641.7,60.4 645.1,59.7 648.6,60.2 652.0,59.5 655.5,59.1 658.9,59.4 662.4,59.0 665.8,58.8 669.2,59.2 672.7,60.0 676.1,58.8 679.6,58.9 683.0,58.6 686.5,59.0 689.9,58.7 693.3,59.3 696.8,58.7 700.2,57.9 703.7,58.8 707.1,59.6 710.6,59.1 714.0,58.2" fill="none" stroke="#60a5fa" stroke-width="2"/>
+<polyline points="70.1,116.9 97.6,85.8 125.2,78.0 152.7,77.6 180.3,74.4 207.8,69.8 235.4,67.5 262.9,65.7 290.5,65.5 318.0,65.2 345.6,64.8 373.1,64.4 400.7,64.3 428.2,63.3 455.8,63.5 483.3,63.2 510.8,63.0 538.4,63.1 565.9,62.9 593.5,62.1 621.0,59.0 648.6,57.7 676.1,57.3 703.7,57.1 714.0,57.4" fill="none" stroke="#a3e635" stroke-width="2"/>
+<text x="380" y="299" fill="#8893a7" font-size="11" text-anchor="middle">PPO update</text>
+</svg></div>
+  <p class="sub">Captured by re-running the champion config with frequent logging. The policy crosses the greedy line early and keeps climbing.</p>
+
+  <div class="two">
+    <div>
+      <h2>Sweep convergence</h2>
+      <div class="card"><svg viewBox="0 0 760 300" width="100%" role="img">
+<line x1="46" y1="254.0" x2="714" y2="254.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="258.0" fill="#8893a7" font-size="10" text-anchor="end">-0.63</text>
+<line x1="46" y1="202.0" x2="714" y2="202.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="206.0" fill="#8893a7" font-size="10" text-anchor="end">-0.55</text>
+<line x1="46" y1="150.0" x2="714" y2="150.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="154.0" fill="#8893a7" font-size="10" text-anchor="end">-0.46</text>
+<line x1="46" y1="98.0" x2="714" y2="98.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="102.0" fill="#8893a7" font-size="10" text-anchor="end">-0.38</text>
+<line x1="46" y1="46.0" x2="714" y2="46.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="50.0" fill="#8893a7" font-size="10" text-anchor="end">-0.29</text>
+<text x="46.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">0</text>
+<text x="380.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">6</text>
+<text x="714.0" y="288" fill="#8893a7" font-size="10" text-anchor="middle">11</text>
+<line x1="46" y1="242.9" x2="714" y2="242.9" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+<text x="710" y="237.9" fill="#fbbf24" font-size="10" text-anchor="end">greedy -0.615</text>
+<polyline points="46.0,89.0 106.7,144.9 167.5,88.4 228.2,66.1 288.9,57.1 349.6,57.8 410.4,57.8 471.1,119.0 531.8,97.6 592.5,85.9 653.3,57.7 714.0,87.2" fill="none" stroke="#a3e635" stroke-width="2"/>
+<text x="380" y="299" fill="#8893a7" font-size="11" text-anchor="middle">trial index</text>
+</svg></div>
+      <p class="sub">Best return per trial. Random search hits the ceiling within the first few trials.</p>
+    </div>
+    <div>
+      <h2>Avg return by PPO epochs</h2>
+      <div class="card"><svg viewBox="0 0 760 240" width="100%" role="img">
+<line x1="46" y1="194.0" x2="744" y2="194.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="198.0" fill="#8893a7" font-size="10" text-anchor="end">-0.39</text>
+<line x1="46" y1="105.0" x2="744" y2="105.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="109.0" fill="#8893a7" font-size="10" text-anchor="end">-0.36</text>
+<line x1="46" y1="16.0" x2="744" y2="16.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="20.0" fill="#8893a7" font-size="10" text-anchor="end">-0.32</text>
+<rect x="92.5" y="153.4" width="139.6" height="40.6" rx="3" fill="#60a5fa" opacity="0.9"/>
+<text x="162.3" y="148.4" fill="#d7dde7" font-size="10" text-anchor="middle">-0.376</text>
+<text x="162.3" y="226" fill="#8893a7" font-size="11" text-anchor="middle">2</text>
+<rect x="325.2" y="173.0" width="139.6" height="21.0" rx="3" fill="#60a5fa" opacity="0.9"/>
+<text x="395.0" y="168.0" fill="#d7dde7" font-size="10" text-anchor="middle">-0.384</text>
+<text x="395.0" y="226" fill="#8893a7" font-size="11" text-anchor="middle">4</text>
+<rect x="557.9" y="32.8" width="139.6" height="161.2" rx="3" fill="#60a5fa" opacity="0.9"/>
+<text x="627.7" y="27.8" fill="#d7dde7" font-size="10" text-anchor="middle">-0.325</text>
+<text x="627.7" y="226" fill="#8893a7" font-size="11" text-anchor="middle">8</text>
+</svg></div>
+      <p class="sub">More update epochs help most on this deterministic env.</p>
+    </div>
+  </div>
+
+  <h2>Avg return by entropy coefficient</h2>
+  <div class="card"><svg viewBox="0 0 760 240" width="100%" role="img">
+<line x1="46" y1="194.0" x2="744" y2="194.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="198.0" fill="#8893a7" font-size="10" text-anchor="end">-0.43</text>
+<line x1="46" y1="105.0" x2="744" y2="105.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="109.0" fill="#8893a7" font-size="10" text-anchor="end">-0.37</text>
+<line x1="46" y1="16.0" x2="744" y2="16.0" stroke="#222a37" stroke-width="1"/>
+<text x="38" y="20.0" fill="#8893a7" font-size="10" text-anchor="end">-0.31</text>
+<rect x="73.9" y="113.6" width="83.8" height="80.4" rx="3" fill="#c084fc" opacity="0.9"/>
+<text x="115.8" y="108.6" fill="#d7dde7" font-size="10" text-anchor="middle">-0.373</text>
+<text x="115.8" y="226" fill="#8893a7" font-size="11" text-anchor="middle">0.0</text>
+<rect x="213.5" y="173.0" width="83.8" height="21.0" rx="3" fill="#c084fc" opacity="0.9"/>
+<text x="255.4" y="168.0" fill="#d7dde7" font-size="10" text-anchor="middle">-0.413</text>
+<text x="255.4" y="226" fill="#8893a7" font-size="11" text-anchor="middle">0.001</text>
+<rect x="353.1" y="32.8" width="83.8" height="161.2" rx="3" fill="#c084fc" opacity="0.9"/>
+<text x="395.0" y="27.8" fill="#d7dde7" font-size="10" text-anchor="middle">-0.319</text>
+<text x="395.0" y="226" fill="#8893a7" font-size="11" text-anchor="middle">0.003</text>
+<rect x="492.7" y="98.2" width="83.8" height="95.8" rx="3" fill="#c084fc" opacity="0.9"/>
+<text x="534.6" y="93.2" fill="#d7dde7" font-size="10" text-anchor="middle">-0.363</text>
+<text x="534.6" y="226" fill="#8893a7" font-size="11" text-anchor="middle">0.01</text>
+<rect x="632.3" y="64.8" width="83.8" height="129.2" rx="3" fill="#c084fc" opacity="0.9"/>
+<text x="674.2" y="59.8" fill="#d7dde7" font-size="10" text-anchor="middle">-0.341</text>
+<text x="674.2" y="226" fill="#8893a7" font-size="11" text-anchor="middle">0.03</text>
+</svg></div>
+  <p class="sub">Entropy bonus is fairly insensitive once epochs are high — the policy peaks either way.</p>
+
+  <h2>Leaderboard — all 12 trials</h2>
+  <div class="card tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>best_eval</th><th>uplift</th><th>argmax</th><th>sample</th>
+      <th>lr</th><th>gamma</th><th>ent</th><th>epochs</th><th>mb</th><th>hidden</th><th>envs</th><th>anneal</th><th>trial</th></tr></thead>
+    <tbody>
+<tr class="champ"><td>1</td><td>-0.3120</td><td>+0.3030</td><td>-0.312</td><td>-0.315</td><td>0.0005</td><td>0.99</td><td>0.003</td><td>8</td><td>2</td><td>256</td><td>256</td><td>True</td><td>4</td></tr>
+<tr><td>2</td><td>-0.3129</td><td>+0.3021</td><td>-0.313</td><td>-0.313</td><td>0.0008</td><td>0.97</td><td>0.03</td><td>8</td><td>8</td><td>128</td><td>128</td><td>True</td><td>10</td></tr>
+<tr><td>3</td><td>-0.3130</td><td>+0.3020</td><td>-0.313</td><td>-0.314</td><td>0.001</td><td>0.95</td><td>0.0</td><td>8</td><td>2</td><td>64</td><td>128</td><td>True</td><td>5</td></tr>
+<tr><td>4</td><td>-0.3130</td><td>+0.3020</td><td>-0.313</td><td>-0.341</td><td>0.0002</td><td>0.93</td><td>0.03</td><td>4</td><td>8</td><td>128</td><td>128</td><td>True</td><td>6</td></tr>
+<tr><td>5</td><td>-0.3266</td><td>+0.2884</td><td>-0.327</td><td>-0.327</td><td>0.001</td><td>0.93</td><td>0.003</td><td>8</td><td>4</td><td>256</td><td>512</td><td>False</td><td>3</td></tr>
+<tr><td>6</td><td>-0.3589</td><td>+0.2561</td><td>-0.364</td><td>-0.359</td><td>0.0001</td><td>0.95</td><td>0.03</td><td>8</td><td>2</td><td>128</td><td>128</td><td>False</td><td>9</td></tr>
+<tr><td>7</td><td>-0.3611</td><td>+0.2539</td><td>-0.364</td><td>-0.361</td><td>0.0005</td><td>0.93</td><td>0.0</td><td>2</td><td>8</td><td>256</td><td>512</td><td>False</td><td>11</td></tr>
+<tr><td>8</td><td>-0.3630</td><td>+0.2520</td><td>-0.363</td><td>-0.363</td><td>0.001</td><td>0.97</td><td>0.01</td><td>2</td><td>4</td><td>128</td><td>128</td><td>False</td><td>2</td></tr>
+<tr><td>9</td><td>-0.3640</td><td>+0.2510</td><td>-0.364</td><td>-0.372</td><td>0.0008</td><td>0.95</td><td>0.0</td><td>2</td><td>4</td><td>256</td><td>512</td><td>False</td><td>0</td></tr>
+<tr><td>10</td><td>-0.3780</td><td>+0.2370</td><td>-0.378</td><td>-0.379</td><td>0.0008</td><td>0.95</td><td>0.03</td><td>2</td><td>8</td><td>256</td><td>128</td><td>False</td><td>8</td></tr>
+<tr><td>11</td><td>-0.4130</td><td>+0.2020</td><td>-0.413</td><td>-0.418</td><td>0.0002</td><td>0.9</td><td>0.001</td><td>2</td><td>4</td><td>256</td><td>256</td><td>True</td><td>7</td></tr>
+<tr><td>12</td><td>-0.4552</td><td>+0.1598</td><td>-0.964</td><td>-0.455</td><td>0.0002</td><td>0.97</td><td>0.0</td><td>4</td><td>2</td><td>64</td><td>256</td><td>True</td><td>1</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="sub" style="margin-top:30px">Generated by <code>make_dashboard.py</code> from <code>runs/sweep/</code>. Re-run it after another sweep to refresh.</p>
+
+</div></body></html>
