@@ -34,6 +34,13 @@ ENV_META = {
         "blurb": "The same allocation engine, now spending a limited cancer-screening budget across "
                  "Tennessee counties to maximize population-weighted early-stage detection.",
     },
+    "drug": {
+        "sweep": "sweep_drug", "curve": "champion_curve_drug", "episode": "Episode 3",
+        "title": "Drug inventory allocator — PPO tuning sweep",
+        "subtitle": "Buy-and-bill oncology drug ordering under stochastic demand, same engine new skin",
+        "blurb": "The same allocation engine, now reordering perishable oncology drugs against random "
+                 "weekly demand to minimize wastage and stockouts (margin leakage).",
+    },
 }
 _ap = argparse.ArgumentParser()
 _ap.add_argument("--env", default="nashville", choices=list(ENV_META))

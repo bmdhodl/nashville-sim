@@ -55,9 +55,9 @@ SEARCH_SPACE = {
 
 
 def sample_config(rng: random.Random, trial_idx: int, steps_per_trial: int,
-                  env: str, sweep_name: str) -> Config:
+                  env: str, sweep_name: str, years: int | None = None) -> Config:
     chosen = {k: rng.choice(v) for k, v in SEARCH_SPACE.items()}
-    return Config(
+    kw = dict(
         run_name=f"{sweep_name}/trials/trial_{trial_idx:04d}",
         env=env,
         seed=5090 + trial_idx,
@@ -66,6 +66,9 @@ def sample_config(rng: random.Random, trial_idx: int, steps_per_trial: int,
         log_every_updates=10_000,  # only the final eval matters for the sweep
         **chosen,
     )
+    if years is not None:
+        kw["years"] = years  # drug env runs a 24-week horizon
+    return Config(**kw)
 
 
 def write_leaderboard(results: list[dict], path: Path, top: int = 25) -> None:
@@ -91,6 +94,7 @@ def main() -> None:
     ap.add_argument("--env", default="nashville")
     ap.add_argument("--budget-hours", type=float, default=8.0)
     ap.add_argument("--steps-per-trial", type=int, default=800_000)
+    ap.add_argument("--years", type=int, default=None, help="episode horizon override (drug env: 24)")
     ap.add_argument("--seed", type=int, default=5090)
     args = ap.parse_args()
 
@@ -126,7 +130,7 @@ def main() -> None:
                       f"next trial (~{est_trial:.0f}s) would exceed budget.")
                 break
 
-            cfg = sample_config(rng, trial_idx, args.steps_per_trial, args.env, sweep_name)
+            cfg = sample_config(rng, trial_idx, args.steps_per_trial, args.env, sweep_name, args.years)
             t0 = time.time()
             try:
                 result = train(cfg)
