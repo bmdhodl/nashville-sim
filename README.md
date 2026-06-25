@@ -14,6 +14,22 @@ allocation under a budget**, with a self-contained PPO trainer. The same
   across Tennessee counties to maximize population-weighted early-stage detection,
   with an equity penalty for leaving the worst-covered counties behind. This is the
   "where should limited healthcare dollars go to do the most good" question.
+- **`drug`** (Episode 3): the same engine runs a community oncology practice's
+  buy-and-bill drug desk — reordering expensive, perishable infusion drugs against
+  random weekly demand to minimize wastage and stockouts (the margin-leakage
+  problem). Demand is *stochastic*, so the agent learns to buffer under uncertainty.
+
+## Watch it train live
+
+Training prints rldash-format progress to `runs/<name>/train.log`. Point
+[rldash](https://github.com/bmdhodl/rldash) at it to watch returns climb live, with
+a GPU gauge:
+
+```bash
+python rldash.py --log "runs/*/train.log" --title "DRUG RL"
+# watching a WSL run from a Windows terminal:
+python rldash.py --log "\\wsl$\Ubuntu-22.04\home\pat\...\runs\*\train.log"
+```
 
 ## Results
 
@@ -96,13 +112,15 @@ to learn multi-year strategy to beat it.
 python -m venv .venv && . .venv/bin/activate   # or: uv venv && source .venv/bin/activate
 pip install -r requirements.txt                # torch + numpy
 
-python test_env.py                        # city env sanity + baselines
-python test_screening.py                  # screening env sanity + baselines
+python test_env.py / test_screening.py / test_drug.py   # env sanity + baselines
 python train.py --total-steps 800000      # train the city env -> runs/<name>/
-python train.py --env screening --total-steps 800000   # train the screening env
+python train.py --env screening --total-steps 800000    # train the screening env
+python train.py --env drug --years 24 --total-steps 12000000   # train the drug env
 python sweep.py --env screening --budget-hours 0.3      # sweep the screening env
 python make_dashboard.py --env screening  # render runs/sweep_screening/dashboard.html
 ```
+
+The drug env's horizon is 24 weeks, so pass `--years 24` when training it.
 
 The trainer puts the policy on the GPU (CUDA); the env itself is pure-Python and
 CPU-bound, so GPU draw is light. A numpy-vectorized env is the obvious next

@@ -1,0 +1,9 @@
+{
+  "description": "Illustrative buy-and-bill oncology drug set for DrugInventoryEnv. Normalized values capturing the real shape: thin margins (reimbursement just above vial_cost), expensive waste (a perished vial loses the full cost), short shelf life, random weekly demand. NOT a real price file. Replace with practice purchase + ASP data per the schema.",
+  "drugs": [
+    {"name": "Pembrolizumab", "vial_cost": 0.90, "reimbursement": 1.00, "shelf_life": 3, "demand_lambda": 1.2},
+    {"name": "Rituximab",     "vial_cost": 0.60, "reimbursement": 0.68, "shelf_life": 4, "demand_lambda": 1.6},
+    {"name": "Bevacizumab",   "vial_cost": 0.50, "reimbursement": 0.56, "shelf_life": 3, "demand_lambda": 1.0},
+    {"name": "Trastuzumab",   "vial_cost": 0.70, "reimbursement": 0.78, "shelf_life": 5, "demand_lambda": 0.8}
+  ]
+}

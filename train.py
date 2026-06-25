@@ -31,6 +31,8 @@ from nashville_sim import NashvilleGrowthEnv
 from nashville_sim.env import load_corridors
 from screening_sim import EarlyDetectionEnv
 from screening_sim.env import load_counties
+from drug_sim import DrugInventoryEnv
+from drug_sim.env import load_drugs
 
 RUNS_DIR = Path(__file__).resolve().parent / "runs"
 
@@ -38,6 +40,7 @@ RUNS_DIR = Path(__file__).resolve().parent / "runs"
 ENV_REGISTRY = {
     "nashville": (NashvilleGrowthEnv, load_corridors),
     "screening": (EarlyDetectionEnv, load_counties),
+    "drug": (DrugInventoryEnv, load_drugs),
 }
 
 
@@ -246,6 +249,11 @@ def train(config: Config | dict[str, Any]) -> dict[str, Any]:
     logger = csv.DictWriter(log_file, fieldnames=log_fields)
     logger.writeheader()
 
+    # rldash-friendly progress log (github.com/bmdhodl/rldash). One line per
+    # update in the default rldash pattern, so you can watch training live:
+    #   python rldash.py --log "runs/*/train.log"
+    rldash_log = (run_dir / "train.log").open("w")
+
     start = time.time()
     best_eval = -float("inf")
     global_step = 0
@@ -357,7 +365,19 @@ def train(config: Config | dict[str, Any]) -> dict[str, Any]:
         logger.writerow(last_metrics)
         log_file.flush()
 
+        # rldash progress line. ep_len is the fixed episode length; rps is reward
+        # per step; EV is value-function explained variance.
+        sps = global_step / max(1e-9, time.time() - start)
+        ev = (1.0 - (b_ret - b_val).var() / (b_ret.var() + 1e-8)).item()
+        rldash_log.write(
+            f"upd {update}/{num_updates} step {global_step} SPS {sps:.0f} "
+            f"ep_ret {train_return:.4f} ep_len {cfg.years} rps {train_return / cfg.years:.4f} "
+            f"v_loss {v_loss.item():.4f} EV {ev:+.3f} ent {ent.item():.3f}\n"
+        )
+        rldash_log.flush()
+
     log_file.close()
+    rldash_log.close()
     baselines = evaluate_baselines(env_cls, units, cfg, cfg.eval_episodes)
     final_argmax = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "argmax")
     final_sample = evaluate_policy(model, env_cls, units, cfg, cfg.eval_episodes, device, "sample")
